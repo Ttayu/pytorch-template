@@ -1,7 +1,7 @@
 import torch
 
 
-def accuracy(output: torch.Tensor, target: torch.Tensor) -> float:
+def accuracy(output: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     assert output.shape[0] == target.shape[0]
     with torch.no_grad():
         pred = torch.argmax(output, dim=1)
@@ -10,7 +10,7 @@ def accuracy(output: torch.Tensor, target: torch.Tensor) -> float:
     return correct / len(target)
 
 
-def top_k_acc(output: torch.Tensor, target: torch.Tensor, k: int = 3) -> float:
+def top_k_acc(output: torch.Tensor, target: torch.Tensor, k: int = 3) -> torch.Tensor:
     assert output.shape[0] == target.shape[0]
     with torch.no_grad():
         pred = torch.topk(output, k, dim=1)[1]

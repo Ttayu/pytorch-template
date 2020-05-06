@@ -56,7 +56,7 @@ class BaseTrainer(metaclass=ABCMeta):
 
         self.start_epoch = 1
 
-        self.checkpoint_dir = config.save_dir
+        self.checkpoint_dir = config.model_dir
 
         # setup visualization writer instance
         self.writer = TensorboardWriter(
