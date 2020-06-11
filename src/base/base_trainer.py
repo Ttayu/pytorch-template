@@ -125,7 +125,7 @@ class BaseTrainer(metaclass=ABCMeta):
                     )
                     break
 
-            if epoch % self.save_period == 0:
+            if best or epoch % self.save_period == 0:
                 self._save_checkpoint(epoch, save_best=best)
 
     def _prepare_device(self, n_gpu_use: int) -> Tuple[torch.device, List[int]]:

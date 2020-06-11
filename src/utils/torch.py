@@ -7,19 +7,6 @@ import torch
 import torch.backends.cudnn as cudnn
 
 
-def assert_fp16_available() -> None:
-    assert cudnn.enabled, "fp16 mode requires cudnn backend to be enabled."
-
-    try:
-        import apex  # noqa: F401
-        from apex import amp  # noqa: F401
-    except ImportError:
-        raise ImportError(
-            "NVidia Apex package must be installed."
-            "See https://github.com/NVIDIA/apex."
-        )
-
-
 def get_device() -> torch.device:
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
