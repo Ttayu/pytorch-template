@@ -1,16 +1,20 @@
 import logging
 import os
+import shutil
 from datetime import datetime
 from functools import partial, reduce
 from operator import getitem
 from pathlib import Path
+from typing import Optional
 
 from logger import setup_logging
-from utils import read_json, write_json
+from utils import dump_code, read_json, write_json
 
 
 class ConfigParser:
-    def __init__(self, config, resume=None, modification=None, run_id=None):
+    def __init__(
+        self, config, resume: Optional[Path] = None, modification=None, run_id=None
+    ):
         """
         class to parse configuration json file. Handles hyperparameters for training, initializations of modules, checkpoint saving
         and logging module.
@@ -34,7 +38,6 @@ class ConfigParser:
         self._log_dir = self.save_dir / "log"
 
         # make directory for saving checkpoints and log.
-        # exist_ok = run_id == ""
         exist_ok = True
         self._save_dir.mkdir(parents=True, exist_ok=exist_ok)
         self._model_dir.mkdir(parents=True, exist_ok=exist_ok)
@@ -43,9 +46,15 @@ class ConfigParser:
         # save updated config file to the checkpoint dir
         write_json(self.config, self.save_dir / "config.json")
 
+        # save code to the checkpoint dir
+        dump_code(self.save_dir)
+
         # configure logging module
         setup_logging(self.log_dir)
         self.log_levels = {0: logging.WARNING, 1: logging.INFO, 2: logging.DEBUG}
+
+        # copy log and model in the checkpoint begin.
+        self._copy_checkpoint()
 
     @classmethod
     def from_args(cls, args, options=""):
@@ -60,8 +69,10 @@ class ConfigParser:
         if args.device is not None:
             os.environ["CUDA_VISIBLE_DEVICES"] = args.device
         if args.resume is not None:
+            # ./path/to/datetime/models/model.pth
             resume = Path(args.resume)
-            cfg_fname = resume.parent / "config.json"
+            # ./path/to/datetime/config.json
+            cfg_fname = resume.parent.parent / "config.json"
         else:
             msg_no_cfg = "Configuration file need to be specified. Add '-c config.json', for example."
             assert args.config is not None, msg_no_cfg
@@ -112,6 +123,32 @@ class ConfigParser:
         ), "Overwriting kwargs given in config file is not allowed"
         module_args.update(kwargs)
         return partial(getattr(module, module_name), *args, **module_args)
+
+    def _copy_checkpoint(self):
+        def copy_trained_log():
+            # experiment_name/run_id/models/model.pth
+            # -> experiment_name/run_id/log
+            trained_log_dir: Path = self.resume.parents[1] / "log"
+            print(trained_log_dir)
+            for trained_log in trained_log_dir.glob("*"):
+                # skip tensorboard file because it is too large file.
+                if "events" in trained_log.name:
+                    continue
+                shutil.copy(trained_log, self.log_dir / f"train_{trained_log.name}")
+
+        def copy_resume():
+            shutil.copy(self.resume, self.model_dir / self.resume.name)
+
+        def copy_run_id():
+            # experiment_name/run_id/models/model.pth
+            run_id = self.resume.parents[1].name
+            (self.save_dir / run_id).touch()
+
+        if self.resume is None:
+            return
+        copy_trained_log()
+        copy_resume()
+        copy_run_id()
 
     def __getitem__(self, name):
         """Access items like ordinary dict."""
