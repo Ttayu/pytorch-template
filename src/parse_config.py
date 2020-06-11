@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Optional
 
 from logger import setup_logging
-from utils import dump_code, read_json, write_json
+from utils import dump_code, dump_environment, read_json, write_json
 
 
 class ConfigParser:
@@ -48,6 +48,9 @@ class ConfigParser:
 
         # save code to the checkpoint dir
         dump_code(self.save_dir)
+
+        # save python environment
+        dump_environment(self.save_dir)
 
         # configure logging module
         setup_logging(self.log_dir)
