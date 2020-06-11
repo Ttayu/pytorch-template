@@ -6,13 +6,15 @@ from typing import Dict, Union
 
 import pandas as pd
 
-from logger import TensorboardWriter
-
 
 def ensure_dir(dirname):
     dirname = Path(dirname)
     if not dirname.is_dir():
         dirname.mkdir(parents=True, exist_ok=False)
+
+
+def ensure_path(path: Union[str, Path]) -> Path:
+    return Path(path)
 
 
 def read_json(fname):
@@ -34,7 +36,7 @@ def inf_loop(data_loader):
 
 
 class MetricTracker:
-    def __init__(self, *keys, writer: TensorboardWriter = None):
+    def __init__(self, *keys, writer=None):
         self.writer = writer
         self._data = pd.DataFrame(index=keys, columns=["total", "counts", "average"])
         self.reset()
