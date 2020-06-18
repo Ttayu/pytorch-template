@@ -18,10 +18,14 @@ class BaseTrainer(metaclass=ABCMeta):
         self,
         model: torch.nn.Module,
         criterion: torch.nn.modules.loss._Loss,
-        metric_ftns: Callable[..., float],
+        metric_ftns: List[Callable[..., float]],
         optimizer: torch.optim.Optimizer,
         config: ConfigParser,
-        lr_scheduler: torch.optim.lr_scheduler._LRScheduler = None,
+        lr_scheduler: Union[
+            torch.optim.lr_scheduler._LRScheduler,
+            torch.optim.lr_scheduler.ReduceLROnPlateau,
+            None,
+        ] = None,
     ):
         self.config = config
         self.logger = config.get_logger("trainer", config["trainer"]["verbosity"])

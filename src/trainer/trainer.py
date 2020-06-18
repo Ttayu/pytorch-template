@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Callable, Dict, Union
+from typing import Callable, Dict, List, Union
 
 import numpy as np
 import torch
@@ -22,15 +22,19 @@ class Trainer(BaseTrainer):
         self,
         model: torch.nn.Module,
         criterion: torch.nn.modules.loss._Loss,
-        metric_ftns: Callable[..., float],
+        metric_ftns: List[Callable[..., float]],
         optimizer: torch.optim.Optimizer,
         config: ConfigParser,
         data_loader: torch.utils.data.DataLoader,
         valid_data_loader: torch.utils.data.DataLoader = None,
-        lr_scheduler: torch.optim.lr_scheduler._LRScheduler = None,
+        lr_scheduler: Union[
+            torch.optim.lr_scheduler._LRScheduler,
+            torch.optim.lr_scheduler.ReduceLROnPlateau,
+            None,
+        ] = None,
         len_epoch: int = None,
     ):
-        super().__init__(model, criterion, metric_ftns, optimizer, config)
+        super().__init__(model, criterion, metric_ftns, optimizer, config, lr_scheduler)
         self.config = config
         self.data_loader = data_loader
         if len_epoch is None:
@@ -42,7 +46,6 @@ class Trainer(BaseTrainer):
             self.len_epoch = len_epoch
         self.valid_data_loader = valid_data_loader
         self.do_validation = self.valid_data_loader is not None
-        self.lr_scheduler = lr_scheduler
         self.log_step = int(np.sqrt(data_loader.batch_size))
 
         self.train_metrics = MetricTracker(
@@ -97,11 +100,11 @@ class Trainer(BaseTrainer):
 
         if self.lr_scheduler is not None:
             if self.lr_scheduler.__class__.__name__ == "ReduceLROnPlateau":
-                self.lr_scheduler.step(val_log["loss"])
                 log["lr"] = self.optimizer.param_groups[0]["lr"]
+                self.lr_scheduler.step(val_log["loss"], epoch)
             else:
-                self.lr_scheduler.step()
                 log["lr"] = self.lr_scheduler.get_last_lr()
+                self.lr_scheduler.step(epoch)
         return log
 
     def _valid_epoch(self, epoch: int) -> Dict[str, Union[int, float]]:
