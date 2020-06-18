@@ -213,7 +213,7 @@ class BaseTrainer(metaclass=ABCMeta):
         # load lr scheduler state from checkpoint when scheduler type is not changed.
         if (
             self.lr_scheduler is not None
-            and "lr_scheduler" in checkpoint["config"]
+            and "lr_scheduler" in checkpoint["config"].config
             and checkpoint["config"]["lr_scheduler"]["type"]
             == self.config["lr_scheduler"]["type"]
         ):
