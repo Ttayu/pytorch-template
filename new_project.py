@@ -26,7 +26,7 @@ ignore = [
     "LICENSE",
     "README.md",
     "__pycache__",
-    "..mypy_cache",
+    ".mypy_cache",
 ]
 
 copytree(
@@ -36,7 +36,9 @@ copytree(
 )
 (target_dir / "config").mkdir()
 copy(current_dir / "config.json", target_dir / "config")
-(target_dir / "dataset").mkdir()
+(target_dir / "datasets").mkdir()
 (target_dir / "saved").mkdir()
+copy(current_dir / ".gitignore", target_dir / "config")
+copy(current_dir / ".flake8", target_dir / "config")
 
 print("New project initialized at", target_dir.absolute().resolve())
