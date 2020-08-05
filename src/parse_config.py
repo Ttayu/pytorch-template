@@ -103,6 +103,8 @@ class ConfigParser:
         `object = module.name(a, b=1)`
         """
         module_name = self[name]["type"]
+        if module_name == "None":
+            return None
         module_args = dict(self[name]["args"])
         assert all(
             [k not in module_args for k in kwargs]

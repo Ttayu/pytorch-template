@@ -103,7 +103,7 @@ class Trainer(BaseTrainer):
                 log["lr"] = self.optimizer.param_groups[0]["lr"]
                 self.lr_scheduler.step(val_log["loss"], epoch)
             else:
-                log["lr"] = self.lr_scheduler.get_last_lr()
+                log["lr"] = self.lr_scheduler.get_last_lr()[0]
                 self.lr_scheduler.step(epoch)
         return log
 
