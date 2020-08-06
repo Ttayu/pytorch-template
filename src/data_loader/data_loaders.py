@@ -16,6 +16,8 @@ class MnistDataLoader(BaseDataLoader):
         validation_split: float = 0.0,
         num_workers: int = 1,
         training: bool = True,
+        pin_memory: bool = False,
+        drop_last: bool = False,
     ):
         trsfm = transforms.Compose(
             [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
@@ -25,5 +27,11 @@ class MnistDataLoader(BaseDataLoader):
             self.data_dir, train=training, download=True, transform=trsfm
         )
         super().__init__(
-            self.dataset, batch_size, shuffle, validation_split, num_workers
+            self.dataset,
+            validation_split,
+            batch_size,
+            shuffle,
+            num_workers,
+            pin_memory,
+            drop_last,
         )

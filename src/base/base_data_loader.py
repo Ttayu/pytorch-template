@@ -14,11 +14,13 @@ class BaseDataLoader(DataLoader):
     def __init__(
         self,
         dataset: Dataset,
-        batch_size: int,
-        shuffle: bool,
         validation_split: float,
-        num_workers: int,
+        batch_size: int = 0,
+        shuffle: bool = False,
+        num_workers: int = 0,
         collate_fn: Callable = default_collate,
+        pin_memory: bool = False,
+        drop_last: bool = False,
     ):
         self.validation_split = validation_split
         self.shuffle = shuffle
@@ -32,8 +34,10 @@ class BaseDataLoader(DataLoader):
             "dataset": dataset,
             "batch_size": batch_size,
             "shuffle": self.shuffle,
-            "collate_fn": collate_fn,
             "num_workers": num_workers,
+            "pin_memory": pin_memory,
+            "drop_last": drop_last,
+            "collate_fn": collate_fn,
         }
         super().__init__(sampler=self.sampler, **self.init_kwargs)
 
