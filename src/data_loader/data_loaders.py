@@ -32,6 +32,6 @@ class MnistDataLoader(BaseDataLoader):
             batch_size,
             shuffle,
             num_workers,
-            pin_memory,
-            drop_last,
+            pin_memory=pin_memory,
+            drop_last=drop_last,
         )
