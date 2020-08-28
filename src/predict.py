@@ -8,8 +8,6 @@ import criterions as module_criterion
 import data_loader.data_loaders as module_data
 import metrics as module_metric
 import models as module_arch
-import optimizers as module_optim
-import utils
 from parse_config import ConfigParser
 
 
@@ -35,14 +33,14 @@ def main(config):
     metric_fns = [getattr(module_metric, met) for met in config["metrics"]]
 
     logger.info("Loading checkpoint: {} ...".format(config.resume))
-    checkpoint = torch.load(config.resume)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    checkpoint = torch.load(config.resume, map_location=device)
     state_dict = checkpoint["state_dict"]
     if config["n_gpu"] > 1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
 
     # prepare model for testing
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device)
     model.eval()
 
