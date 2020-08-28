@@ -1,7 +1,6 @@
 import argparse
 import collections
 
-import numpy as np
 import torch
 
 import criterions as module_criterion
@@ -88,4 +87,12 @@ if __name__ == "__main__":
         CustomArgs(["--epochs"], type=int, target=("trainer;epochs")),
     ]
     config = ConfigParser.from_args(args, options)
-    main(config)
+    try:
+        main(config)
+    except Exception:
+        import shutil
+        import traceback
+
+        traceback.print_exc()
+        shutil.rmtree(config.save_dir)
+        exit(1)

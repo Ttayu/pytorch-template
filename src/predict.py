@@ -107,4 +107,12 @@ if __name__ == "__main__":
     ]
 
     config = ConfigParser.from_args(args, options)
-    main(config)
+    try:
+        main(config)
+    except Exception:
+        import shutil
+        import traceback
+
+        traceback.print_exc()
+        shutil.rmtree(config.save_dir)
+        exit(1)
